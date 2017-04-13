@@ -1,3 +1,8 @@
 - [ ] Basic
-- [ ] Distributed
+    - [ ] MPI method among workers (direct socket? shared file in mem? forwarded by master?)
+    - [ ] Distributed List
+        - [ ] distributed .map, .filter, .reduce, .reduceByKey
+    - [ ] Distributed Map
+        - [ ] distributed .map, .filter, .get, .put, ...
+- [ ] Distributed Env
 - [ ] Support browser by web worker
