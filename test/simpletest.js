@@ -20,7 +20,7 @@ accel.init({}, function(err) {
     $(function remoteTimeCount(callback) {
         setTimeout(function() {
             callback("It's high noon!");
-        }, 1000);
+        }, 5000);
     }, "async");
 
     $.remoteTimeCount(function(result) {
