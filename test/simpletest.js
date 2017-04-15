@@ -16,6 +16,16 @@ accel.init({}, function(err) {
         return q;
     });
 
+
+    $(function remoteTimeCount(callback) {
+        setTimeout(function() {
+            callback("It's high noon!");
+        }, 1000);
+    }, "async");
+
+    $.remoteTimeCount(function(result) {
+        console.log(result);
+    });
     $.calculate(1, 10000000, function(result) {
         console.log("Seed: 1, Times: 10M, Res:", result);
     });
