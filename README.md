@@ -149,6 +149,15 @@ $.someAsyncFunc(arg1, arg2, (params) => {
 });
 ```
 
+Besides, all the remote functions can be decorated before called:
+
+```javascript
+$.someFunction(arg1, arg2, (res) => { });	// normal invocation
+$.someFunction.urgent()(arg1, arg2, (res) => { });	// urgent invocation, the task will be scheduled first
+$.someFunction.to(2)(arg1, arg2, (res) => { });	// targeted invocation, the task will be assigned to node 2
+$.someFunction.toAll()(arg1, arg2, (res) => { });	// cohert invocation, each node will execute this task exactly once
+```
+
 ## Homogeneous Dependency
 
 In most cases, it is required to import some packages outside in worker functions. This is achieved by introducing homogeneous dependency:
