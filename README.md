@@ -165,3 +165,6 @@ $(function() {
 });
 ```
 
+**Note: Only use it after assigning to a broadcast scope.**
+
+`$.os=accel.require("os");` is OK, while `var os=accel.require("os");` is not ok.
