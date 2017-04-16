@@ -13,5 +13,3 @@ accel.init({}, function(err) {
         console.log(r);
     });
 });
-
-setInterval(function(){}, 1000);
