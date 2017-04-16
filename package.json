@@ -14,6 +14,9 @@
     "Parallel",
     "Multicore"
   ],
+  "dependencies": {
+      "caller": "1.0.1"
+  },
   "contributors": [
       {
           "name" : "Levy Zhao",
