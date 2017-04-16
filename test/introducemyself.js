@@ -14,14 +14,10 @@ accel.init({env: [{local: 4}]}, function(err) {
     function reportResult(result) {
         console.log(result);
     }
-    $.introduce(reportResult);
-    $.introduce(reportResult);
-    $.introduce(reportResult);
-    $.introduce(reportResult);
-    $.introduce(reportResult);
-    $.introduce(reportResult);
-    $.introduce(reportResult);
-    $.introduce(reportResult);
+
+    for (var i=0; i<50; i++) {
+        $.introduce(reportResult);
+    }
 });
 
 setInterval(function(){}, 1000);
