@@ -1,89 +1,167 @@
 # Accel.js
-Team members:
-Leiyu Zhao(leiyuz)
-Hailiang Xu(hailianx)
+Accelerate your Node.js codes on multicores and multi-nodes with no efforts!
 
-## Summary
-We are going to make Node.js parallelized and distributed to achieve higher throughput.
+## Quick Start
 
+Install `accel.js`:
 
+```shell
+npm install --save accel
+```
 
-## Background
+Write a program with computational intensive functions
 
-In the recent 5 years, Node.js is by all means the hotspot of backend (server) programming. By introducing Chrome V8 engine with native syscall support, Javascript is not anymore a wimpy script language which can only be used to render web pages. Instead, by adopting non-blocking asynchronous I/O APIs, Node.js is always capable of keeping CPU running, and therefore achieving far higher throughput than its counterparts Python, PHP and Ruby when providing web services.
+```javascript
+function cpuIntensive(n) {
+    var result=0;
+    for (var i=0; i<n; i++) result=Math.random();
+    return result;
+}
 
-With the popularization of Node.js, it is not surprising to find waves of new packages emerging on NPM (Node Package Manager). They are useful for that they exempt the programmer from finding the package in other languages and use sophisticated way to assemble it. One good example is [fontmin](https://www.npmjs.com/package/fontmin), which minifies the size of fonts to some subset of characters to reduce the traffic to load the font and is highly prevalent for web services like Google Font. Other packages on Machine Learning, Scientific Computing, etc. are also popular.
+for (var i=10000; i<20000; i++) {
+    var result=cpuIntensive(i);
+    console.log(result);
+}
+```
 
-However, using these packages to deploy a service to efficiently use computing resources is not an easy thing. Although Node.js is good at fully utilize one core, it cannot extend to multicores. In Node.js execution model, all codes are running on the single thread. Hence, simply importing those packages and use them as a part of your service has two drawbacks:
+And accelerate it on your awesome dual core machine!
 
-- Poor utilization of multicore CPUs. Since only one thread means at most one core.
-- Node.js implements non-preemptive scheduling, and computation intensive codes will prevent the event loop from accepting any other events (like clock ticks, new requests, messages, etc.)
+```javascript
+var accel=require("accel");
+var $=accel();
 
-Solutions are using multi-process. However, not-shared memory and IPC make it hard and not intuitive. Accel.js helps make life easier: by providing intuitive interfaces, easy to use MPIs and efficient scheduling policies, Accel.js is trying to hiding the complexity beyond the reach of developers. Further, Accel.js makes it extremely easy (no efforts) to extend the service to a cluster.
+function cpuIntensive(n) {
+    var result=0;
+    for (var i=0; i<n; i++) result=Math.random();
+    return result;
+}
+$(cpuIntensive);
 
+accel.init();
+for (var i=10000; i<20000; i++) {
+    $.cpuIntensive(i, (result) => {
+        console.log(result);
+    });
+}
+```
 
+Broadcasting variables? Easy!
 
+```javascript
+var accel=require("accel");
+var $=accel();
 
-## Challenge
-### No shared memory multi-process model
-As mentioned in the background, Node.js exposes no thread-like interfaces to developer, so the only way to utilize multiple cores are multi-process. Since they cannot share the same address space, communications among different processes are harder and may require higher overheads. How to achieve good speedup considering the overheads is a great challenge.
+$.magicNumber1=1103515245;
+$.magicNumber2=12345;
+$(function generatePseudoRandom(next) {
+    next = next * $.magicNumber1 + $.magicNumber2;
+    return Math.floor(next/65536) % 32768;
+});
 
-### How to implement graceful API for Javascript
-Unlike Python, ECMAScript (Javascript) does not support many grammar tricks. Therefore, it is hard to implement intuitive and graceful API to parallelize computing. A counter-example is the builtin package for Node.js, [cluster](https://nodejs.org/api/cluster.html), which makes parallel computing almost no easier than do it from scratch.
+accel.init();
+$.generatePseudoRandom(50, (res) => {
+    console.log(res);
+});
+```
 
-Since our goal is to make life easier, it is very essential to address the challenge.
+Asynchronous function works well, too:
 
-### Meta communication among workers (and master)
-It is obvious that meta-communications exist among nodes, e.g. reporting liveness, pushing/pulling tasks, etc. and some are essentially taking place in the background. However, when the computing intensive task is blocking the event loop, Node.js cannot respond to any background communications.
+```javascript
+var accel=require("accel");
+var $=accel();
 
-The best solution to the problem is introducing Node-gyp to compile C++ codes as part of Node.js library. However, Node-gyp itself is a challenge.
+$.magicTricks=function(str) {...};
+$(function readAndCalculate(callback) {
+    fs.readFile('/etc/passwd', 'utf8', (err, data) => {
+        callback($.magicTricks(data));
+    });
+}, "async");
 
-### Node-gyp
-For functionalities and efficiency requirements, we may need native C++ code as part of our library. Node-gyp is the solution, which allow us to write some C++ to manipulate Chrome V8 engine directly. However, learning Node-gyp is very difficult and may encounter lots of pitfalls.
+accel.init();
+$.readAndCalculate((res) => {
+    console.log(res);
+});
+```
 
+## Initialization
 
+Any application using `accel.js` should initialize it **exactly once**, you can specify how many local workers (run on local CPUs) and how many remote workers (run on other machines) are in the workers pool.
 
+You don't have to wait for the callback before using any functionalities of `accel.js`. Those who rely on the connections among workers will be deferred automatically.
 
-## Resources
-We will start from scratch to build Accel.js. Since we need to test our package in a distributed environment, a cluster of machines are needed. Also, due to the fact that we may require root privilege, Amazon AWS is an ideal platform for us. Another advantage of AWS is we can configure the cluster conveniently.
+### `accel.init(options, [callback])`
 
+- `options`: specify the options for `accel.js`
+  - `env` (optional): List, each element is one of the following: (default is `{local: -1}`)
+    - `{local: workerCount}`: add some number of local workers in the pool, if `workerCount=-1`, it is set to the number of CPUs in local machine.
+    - [Not supported yet] `{remote: workerCount, endPoint: "someEndpoint"}`: add some number of remote workers on the endpoint in the pool.
+- `callback`: called when all workers are spawned, and connections are established.
 
+##  Broadcast Scope
 
+Broadcast scope is the center of all magic. In your code which is executed remotely, all the local variables are not accessible (of course!) and you can use broadcast scope to make them available.
 
-## Goals
-### Minimum Goals
-- Make fully use of one multi-core computer for Node.js.
-- Design and implement distributed master-workers model to alleviate master workload and achieve even better performance.
-- Beat an existing solution [parallel.js](https://parallel.js.org), which has 2.4k stars in Github.
-### Optional Goals
-- Embedding C++ code for communication between master and workers to reduce latency and achieve better load balancing.
+`var $=accel();` will create a new broadcast scope. It is recommended to use separate scope for every .js file to achieve scope isolations. When functions in some scope are executed remotely, the scope will be synchronized automatically and incrementally to broadcast the variables.
+
+The broadcast scope is nothing more than a js-object, just read/write values by `$.someKey=someValue` or `$["someKey"]=someValue`.
+
+The scope can also be used as a function, in order to register worker-functions:
+
+### Register worker-functions: `$(someFunction, [mode])`
+
+- `someFunction`: a function that will be executed remotely. If the function has name, it can be called later by accessing the broadcast scope (`$.funcName(...)`); if the function is anonymous, it can only be called at once (`$(function(){xxx})(...)`).
+- `mode` (optional): define the mode of the function, default is `"sync"`
+  - `"sync"`: the function is working in a synchronous way, its result will be returned as soon as the function exit.
+  - `"async"`: the function is an asynchronous one, and abide the convention that the last parameter is the callback. The result will be passed by the parameter of callback.
+
+**Note: **
+
+- **Synchronizing broadcast scope is not free, so reusing variables helps keeping programs fast. Anonymous function is a one-time function and will never be reused, therefore not recommended.**
+
+- **Syncing is achieved by JSON, therefore unable to reserve prototype chain, function-in-object, etc., although function directly as value will be reserved (as shown below). To use nested objects with prototype and functions remotely please use homogeneous dependency.**
+
+  ```javascript
+  $.x1={func: function() {...}};		// func will not be reserved
+  $.x2=function() {...};			  	// good to go!
+  ```
 
   ​
 
-## Platform
-We plan to extend Node.js to support concurrent execution. The advantage is that program is able to respond to other jobs timely because it won’t be trapped in CPU intensive job for a long time.
+### Invoke worker-functions
 
-Also, currently, web browser JS doesn’t support distributed and parallel execution. It’s possible to port our package to web browser JS.
+For synchronous function, pass all the parameters as normal, plus a trailing function as callback:
 
+```javascript
+function someFunction(arg1, arg2) {}
+$(someFunction);
+$.someFunction(arg1, arg2, (res) => {
+    // now the function has completed
+});
+```
 
+For asynchronous function, call the function as it is.
 
-## Schedule
-We have approximately 5 weeks to do this project.
+```javascript
+function someAsyncFunc(arg1, arg2, callback) {}
+$(someAsyncFunc, "async");
+$.someAsyncFunc(arg1, arg2, (params) => {
+	// now the function has completed
+});
+```
 
-#### Week 1
-- Design graceful API of Node.js
-- Explore the overall architecture of Accel.js
+## Homogeneous Dependency
 
-#### Week 2
-- Complete communication between processes
+In most cases, it is required to import some packages outside in worker functions. This is achieved by introducing homogeneous dependency:
 
-#### Week 3
-- Finish parallel part to make fully use of multi-core
-- Write checkpoint report
+```javascript
+$.os=accel.require("os");
+$.localPackage=accel.require("./localPackage");
 
-#### Week 4
-- Design and implement distributed master-slave model
+$.os.platform();		// you can invoke it locally
+$(function() {
+    return $.os.platform();	// or invoke it remotely
+})((res) => {
+    // do something
+});
+```
 
-#### Week 5
-- Conduct experiments and evaluate our implementation vs. parallel.js
-- Write final report
