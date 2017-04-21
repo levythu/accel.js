@@ -3,19 +3,20 @@ var $=accel();
 
 var nop=()=>1;
 accel.init({env: [{local: 4}]}, function(err) {
-    $.c=new accel.Channel();
-    $.waitForMsg=function(callback) {
-        $.c.Recv((what) => {
-            console.log("Node", accel.id, "Receives:", what);
-            callback();
-        });
-    };
+    $.c=new accel.Channel(2);
     $(function run(callback) {
-        $.waitForMsg($.waitForMsg);
+        console.log("Node", accel.id, "Running");
+        setTimeout(() => {
+            $.c.Recv((what) => {
+                console.log("Node", accel.id, "Receives:", what);
+                callback();
+            });
+        }, Math.random()*2000+1000);
     }, "async");
 
-    for (var i=0; i<4; i++) {
-        $.run(nop);
-    }
-    $.c.Send("Huahua");
+    $.run.toAll()(nop);
+    $.c.Send("Message1", () => console.log("Message1 Sent"));
+    $.c.Send("Message2", () => console.log("Message2 Sent"));
+    $.c.Send("Message3", () => console.log("Message3 Sent"));
+    $.c.Send("Message4", () => console.log("Message4 Sent"));
 });
