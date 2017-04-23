@@ -15,7 +15,8 @@
     "Multicore"
   ],
   "dependencies": {
-      "caller": "1.0.1"
+      "caller": "1.0.1",
+      "json-socket": "*"
   },
   "contributors": [
       {
