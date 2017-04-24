@@ -1,7 +1,7 @@
 var accel=require("../lib/index");
 var $=accel();
 
-accel.init({env: [{local: 1}]}, function(err) {
+accel.init({env: [{local: 2}]}, function(err) {
     if (err) {
         console.log(err);
         return;
