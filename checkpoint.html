@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<!-- saved from url=(0035)https://levythu.github.io/accel.js/ -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="viewport" content="width=device-width,maximum-scale=2">
+    <meta name="description" content="accel.js : Gracefully parallelize Node.js on multi-cores and multi-nodes">
+
+    <link rel="stylesheet" type="text/css" media="screen" href="./style.css">
+
+    <title>accel.js</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/levythu/accel.js">View on GitHub</a>
+
+          <h1 id="project_title">accel.js</h1>
+          <h2 id="project_tagline">Gracefully parallelize Node.js on multi-cores and multi-nodes</h2>
+          <a href="." style="display:inline-block; padding-right:2em;">Documentation</a>
+          <a href="./proposal.html" style="display:inline-block; padding-right:2em;">Proposal</a>
+          <a href="./checkpoint.html" style="display:inline-block; padding-right:2em;">Checkpoint</a>
+          
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+            <h1>Accel.js</h1>
+<p>Team members: Leiyu Zhao(leiyuz), Hailiang Xu(hailianx)</p>
+<h2>Completed Work</h2>
+<p>All the APIs specified in README have been accomplished. To specify, it includes remote functions that will be transferred to another process for running; broadcast scope to synchronize variables and make them accessible easily in remote code; homogeneous dependency to allow developer import a package just as local. Currently, all remote functions are dispensed to workers in FIFO, pull-based manner, or developer can explicitly assign the task to some worker, or issue an urgent task.</p>
+<p>Besides, one thing under developing (but yet to release on document) is channel, like MPI. It works similar way to Golang’s channel and can be used to synchronize among workers.</p>
+<p>As for the communication between worker and server, we did some experiments and it turns out socket is a great solution. Also, distributed workers can also adopt this method. We can easily migrate with less effort.</p>
+<h2>Future Schedule</h2>
+<ul><li>
+4.26 - 5.2</li>
+<li>
+Refine API, (optionally implement distributed list)</li>
+<li>
+Implement distributed part, let Accel.js work for a cluster</li>
+<li>
+5.3 - 5.9</li>
+<li>
+Conduct experiments to evaluate our package </li>
+<li>
+Write final report</li>
+</ul>
+<h2>Expectation</h2>
+<p>Up to now, we successfully complete our work before the first checkpoint. We will continue to finish the distributed worker part. As for the optional goal, it depends on the progress for the following week. If all goes well, we will try to embed C++ code to our package.</p>
+<h2>Presentation</h2>
+<p>Since our work is a package of node.js, we plan to show a demo to give a quick usage of our package. After that, we will show some charts of performance comparison for classic applications with computational intensive tasks using our package or not.</p>
+<h2>Concerns</h2>
+<ul><li>
+Messaging passing have huge overheads compared to shared memory model, whether Accel.js can bring significant boost to traditional applications requires evaluation.</li>
+</ul>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        
+        <p class="copyright">accel.js maintained by <a href="https://github.com/levythu">levythu</a></p>
+        
+        <p>Published with <a href="https://pages.github.com/">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+  
+
+</body></html>
