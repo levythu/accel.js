@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<!-- saved from url=(0035)https://levythu.github.io/accel.js/ -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="viewport" content="width=device-width,maximum-scale=2">
+    <meta name="description" content="accel.js : Gracefully parallelize Node.js on multi-cores and multi-nodes">
+
+    <link rel="stylesheet" type="text/css" media="screen" href="./style.css">
+
+    <title>accel.js</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/levythu/accel.js">View on GitHub</a>
+
+          <h1 id="project_title">accel.js</h1>
+          <h2 id="project_tagline">Gracefully parallelize Node.js on multi-cores and multi-nodes</h2>
+          <a href="/" style="display:inline-block; padding-right:2em;">Documentation</a>
+          <a href="/proposal.html" style="display:inline-block; padding-right:2em;">Proposal</a>
+          <a href="/checkpoint" style="display:inline-block; padding-right:2em;">Checkpoint</a>
+          
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+            <h1>Accel.js</h1>
+<p>Team members:
+Leiyu Zhao(leiyuz)
+Hailiang Xu(hailianx)</p>
+<h2>Summary</h2>
+<p>We are going to make Node.js parallelized and distributed to achieve higher throughput.</p>
+<p></p>
+<h2>Background</h2>
+<p>In the recent 5 years, Node.js is by all means the hotspot of backend (server) programming. By introducing Chrome V8 engine with native syscall support, Javascript is not anymore a wimpy script language which can only be used to render web pages. Instead, by adopting non-blocking asynchronous I/O APIs, Node.js is always capable of keeping CPU running, and therefore achieving far higher throughput than its counterparts Python, PHP and Ruby when providing web services.</p>
+<p>With the popularization of Node.js, it is not surprising to find waves of new packages emerging on NPM (Node Package Manager). They are useful for that they exempt the programmer from finding the package in other languages and use sophisticated way to assemble it. One good example is <a href='https://www.npmjs.com/package/fontmin'>fontmin</a>, which minifies the size of fonts to some subset of characters to reduce the traffic to load the font and is highly prevalent for web services like Google Font. Other packages on Machine Learning, Scientific Computing, etc. are also popular.</p>
+<p>However, using these packages to deploy a service to efficiently use computing resources is not an easy thing. Although Node.js is good at fully utilize one core, it cannot extend to multicores. In Node.js execution model, all codes are running on the single thread. Hence, simply importing those packages and use them as a part of your service has two drawbacks:</p>
+<ul><li>
+Poor utilization of multicore CPUs. Since only one thread means at most one core.</li>
+<li>
+Node.js implements non-preemptive scheduling, and computation intensive codes will prevent the event loop from accepting any other events (like clock ticks, new requests, messages, etc.)</li>
+</ul>
+<p>Solutions are using multi-process. However, not-shared memory and IPC make it hard and not intuitive. Accel.js helps make life easier: by providing intuitive interfaces, easy to use MPIs and efficient scheduling policies, Accel.js is trying to hiding the complexity beyond the reach of developers. Further, Accel.js makes it extremely easy (no efforts) to extend the service to a cluster.</p>
+<p></p>
+<h2>Challenge</h2>
+<h3>No shared memory multi-process model</h3>
+<p>As mentioned in the background, Node.js exposes no thread-like interfaces to developer, so the only way to utilize multiple cores are multi-process. Since they cannot share the same address space, communications among different processes are harder and may require higher overheads. How to achieve good speedup considering the overheads is a great challenge.</p>
+<h3>How to implement graceful API for Javascript</h3>
+<p>Unlike Python, ECMAScript (Javascript) does not support many grammar tricks. Therefore, it is hard to implement intuitive and graceful API to parallelize computing. A counter-example is the builtin package for Node.js, <a href='https://nodejs.org/api/cluster.html'>cluster</a>, which makes parallel computing almost no easier than do it from scratch.</p>
+<p>Since our goal is to make life easier, it is very essential to address the challenge.</p>
+<h3>Meta communication among workers (and master)</h3>
+<p>It is obvious that meta-communications exist among nodes, e.g. reporting liveness, pushing/pulling tasks, etc. and some are essentially taking place in the background. However, when the computing intensive task is blocking the event loop, Node.js cannot respond to any background communications.</p>
+<p>The best solution to the problem is introducing Node-gyp to compile C++ codes as part of Node.js library. However, Node-gyp itself is a challenge.</p>
+<h3>Node-gyp</h3>
+<p>For functionalities and efficiency requirements, we may need native C++ code as part of our library. Node-gyp is the solution, which allow us to write some C++ to manipulate Chrome V8 engine directly. However, learning Node-gyp is very difficult and may encounter lots of pitfalls.</p>
+<p></p>
+<h2>Resources</h2>
+<p>We will start from scratch to build Accel.js. Since we need to test our package in a distributed environment, a cluster of machines are needed. Also, due to the fact that we may require root privilege, Amazon AWS is an ideal platform for us. Another advantage of AWS is we can configure the cluster conveniently.</p>
+<p></p>
+<h2>Goals</h2>
+<h3>Minimum Goals</h3>
+<ul><li>
+Make fully use of one multi-core computer for Node.js.</li>
+<li>
+Design and implement distributed master-workers model to alleviate master workload and achieve even better performance.</li>
+<li>
+Beat an existing solution <a href='https://parallel.js.org'>parallel.js</a>, which has 2.4k stars in Github.</li>
+</ul>
+<h3>Optional Goals</h3>
+<ul><li>
+<p>Embedding C++ code for communication between master and workers to reduce latency and achieve better load balancing.</p>
+<p>​</p>
+</li>
+</ul>
+<h2>Platform</h2>
+<p>We plan to extend Node.js to support concurrent execution. The advantage is that program is able to respond to other jobs timely because it won’t be trapped in CPU intensive job for a long time.</p>
+<p>Also, currently, web browser JS doesn’t support distributed and parallel execution. It’s possible to port our package to web browser JS.</p>
+<p></p>
+<h2>Schedule</h2>
+<p>We have approximately 5 weeks to do this project.</p>
+<h4>Week 1</h4>
+<ul><li>
+Design graceful API of Node.js</li>
+<li>
+Explore the overall architecture of Accel.js</li>
+</ul>
+<h4>Week 2</h4>
+<ul><li>
+Complete communication between processes</li>
+</ul>
+<h4>Week 3</h4>
+<ul><li>
+Finish parallel part to make fully use of multi-core</li>
+<li>
+Write checkpoint report</li>
+</ul>
+<h4>Week 4</h4>
+<ul><li>
+Design and implement distributed master-slave model</li>
+</ul>
+<h4>Week 5</h4>
+<ul><li>
+Conduct experiments and evaluate our implementation vs. parallel.js</li>
+<li>
+Write final report</li>
+</ul>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        
+        <p class="copyright">accel.js maintained by <a href="https://github.com/levythu">levythu</a></p>
+        
+        <p>Published with <a href="https://pages.github.com/">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+  
+
+</body></html>
