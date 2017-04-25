@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<!-- saved from url=(0035)https://levythu.github.io/accel.js/ -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="viewport" content="width=device-width,maximum-scale=2">
+    <meta name="description" content="accel.js : Gracefully parallelize Node.js on multi-cores and multi-nodes">
+
+    <link rel="stylesheet" type="text/css" media="screen" href="./style.css">
+
+    <title>accel.js</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/levythu/accel.js">View on GitHub</a>
+
+          <h1 id="project_title">accel.js</h1>
+          <h2 id="project_tagline">Gracefully parallelize Node.js on multi-cores and multi-nodes</h2>
+
+          
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h1 id="acceljs">Accel.js</h1>
+<p>Accelerate your Node.js codes on multicores and multi-nodes with no efforts!</p>
+
+<h2 id="quick-start">Quick Start</h2>
+
+<p>Install <code class="highlighter-rouge">accel.js</code>:</p>
+
+<div class="language-shell highlighter-rouge"><pre class="highlight"><code>npm install --save accel
+</code></pre>
+</div>
+
+<p>Write a program with computational intensive functions</p>
+
+<div class="language-javascript highlighter-rouge"><pre class="highlight"><code><span class="kd">function</span> <span class="nx">cpuIntensive</span><span class="p">(</span><span class="nx">n</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">result</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="nx">i</span><span class="o">&lt;</span><span class="nx">n</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="nx">result</span><span class="o">=</span><span class="nb">Math</span><span class="p">.</span><span class="nx">random</span><span class="p">();</span>
+    <span class="k">return</span> <span class="nx">result</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">i</span><span class="o">=</span><span class="mi">10000</span><span class="p">;</span> <span class="nx">i</span><span class="o">&lt;</span><span class="mi">20000</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">result</span><span class="o">=</span><span class="nx">cpuIntensive</span><span class="p">(</span><span class="nx">i</span><span class="p">);</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">result</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre>
+</div>
+
+<p>And accelerate it on your awesome dual core machine!</p>
+
+<div class="language-javascript highlighter-rouge"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">accel</span><span class="o">=</span><span class="nx">require</span><span class="p">(</span><span class="s2">"accel"</span><span class="p">);</span>
+<span class="kd">var</span> <span class="nx">$</span><span class="o">=</span><span class="nx">accel</span><span class="p">();</span>
+
+<span class="kd">function</span> <span class="nx">cpuIntensive</span><span class="p">(</span><span class="nx">n</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">result</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="nx">i</span><span class="o">&lt;</span><span class="nx">n</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="nx">result</span><span class="o">=</span><span class="nb">Math</span><span class="p">.</span><span class="nx">random</span><span class="p">();</span>
+    <span class="k">return</span> <span class="nx">result</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="nx">$</span><span class="p">(</span><span class="nx">cpuIntensive</span><span class="p">);</span>
+
+<span class="nx">accel</span><span class="p">.</span><span class="nx">init</span><span class="p">();</span>
+<span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">i</span><span class="o">=</span><span class="mi">10000</span><span class="p">;</span> <span class="nx">i</span><span class="o">&lt;</span><span class="mi">20000</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">$</span><span class="p">.</span><span class="nx">cpuIntensive</span><span class="p">(</span><span class="nx">i</span><span class="p">,</span> <span class="p">(</span><span class="nx">result</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">result</span><span class="p">);</span>
+    <span class="p">});</span>
+<span class="p">}</span>
+</code></pre>
+</div>
+
+<p>Broadcasting variables? Easy!</p>
+
+<div class="language-javascript highlighter-rouge"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">accel</span><span class="o">=</span><span class="nx">require</span><span class="p">(</span><span class="s2">"accel"</span><span class="p">);</span>
+<span class="kd">var</span> <span class="nx">$</span><span class="o">=</span><span class="nx">accel</span><span class="p">();</span>
+
+<span class="nx">$</span><span class="p">.</span><span class="nx">magicNumber1</span><span class="o">=</span><span class="mi">1103515245</span><span class="p">;</span>
+<span class="nx">$</span><span class="p">.</span><span class="nx">magicNumber2</span><span class="o">=</span><span class="mi">12345</span><span class="p">;</span>
+<span class="nx">$</span><span class="p">(</span><span class="kd">function</span> <span class="nx">generatePseudoRandom</span><span class="p">(</span><span class="nx">next</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">next</span> <span class="o">=</span> <span class="nx">next</span> <span class="o">*</span> <span class="nx">$</span><span class="p">.</span><span class="nx">magicNumber1</span> <span class="o">+</span> <span class="nx">$</span><span class="p">.</span><span class="nx">magicNumber2</span><span class="p">;</span>
+    <span class="k">return</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">floor</span><span class="p">(</span><span class="nx">next</span><span class="o">/</span><span class="mi">65536</span><span class="p">)</span> <span class="o">%</span> <span class="mi">32768</span><span class="p">;</span>
+<span class="p">});</span>
+
+<span class="nx">accel</span><span class="p">.</span><span class="nx">init</span><span class="p">();</span>
+<span class="nx">$</span><span class="p">.</span><span class="nx">generatePseudoRandom</span><span class="p">(</span><span class="mi">50</span><span class="p">,</span> <span class="p">(</span><span class="nx">res</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">res</span><span class="p">);</span>
+<span class="p">});</span>
+</code></pre>
+</div>
+
+<p>Asynchronous function works well, too:</p>
+
+<div class="language-javascript highlighter-rouge"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">accel</span><span class="o">=</span><span class="nx">require</span><span class="p">(</span><span class="s2">"accel"</span><span class="p">);</span>
+<span class="kd">var</span> <span class="nx">$</span><span class="o">=</span><span class="nx">accel</span><span class="p">();</span>
+
+<span class="nx">$</span><span class="p">.</span><span class="nx">magicTricks</span><span class="o">=</span><span class="kd">function</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span> <span class="p">{...};</span>
+<span class="nx">$</span><span class="p">(</span><span class="kd">function</span> <span class="nx">readAndCalculate</span><span class="p">(</span><span class="nx">callback</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">fs</span><span class="p">.</span><span class="nx">readFile</span><span class="p">(</span><span class="s1">'/etc/passwd'</span><span class="p">,</span> <span class="s1">'utf8'</span><span class="p">,</span> <span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">data</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+        <span class="nx">callback</span><span class="p">(</span><span class="nx">$</span><span class="p">.</span><span class="nx">magicTricks</span><span class="p">(</span><span class="nx">data</span><span class="p">));</span>
+    <span class="p">});</span>
+<span class="p">},</span> <span class="s2">"async"</span><span class="p">);</span>
+
+<span class="nx">accel</span><span class="p">.</span><span class="nx">init</span><span class="p">();</span>
+<span class="nx">$</span><span class="p">.</span><span class="nx">readAndCalculate</span><span class="p">((</span><span class="nx">res</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">res</span><span class="p">);</span>
+<span class="p">});</span>
+</code></pre>
+</div>
+
+<h2 id="initialization">Initialization</h2>
+
+<p>Any application using <code class="highlighter-rouge">accel.js</code> should initialize it <strong>exactly once</strong>, you can specify how many local workers (run on local CPUs) and how many remote workers (run on other machines) are in the workers pool.</p>
+
+<p>You don’t have to wait for the callback before using any functionalities of <code class="highlighter-rouge">accel.js</code>. Those who rely on the connections among workers will be deferred automatically.</p>
+
+<h3 id="accelinitoptions-callback"><code class="highlighter-rouge">accel.init(options, [callback])</code></h3>
+
+<ul>
+  <li><code class="highlighter-rouge">options</code>: specify the options for <code class="highlighter-rouge">accel.js</code>
+    <ul>
+      <li><code class="highlighter-rouge">env</code> (optional): List, each element is one of the following: (default is <code class="highlighter-rouge"><span class="p">{</span><span class="err">local:</span><span class="w"> </span><span class="err">-1</span><span class="p">}</span></code>)
+        <ul>
+          <li><code class="highlighter-rouge"><span class="p">{</span><span class="err">local:</span><span class="w"> </span><span class="err">workerCount</span><span class="p">}</span></code>: add some number of local workers in the pool, if <code class="highlighter-rouge">workerCount=-1</code>, it is set to the number of CPUs in local machine.</li>
+          <li>[Not supported yet] <code class="highlighter-rouge"><span class="p">{</span><span class="err">remote:</span><span class="w"> </span><span class="err">workerCount,</span><span class="w"> </span><span class="err">endPoint:</span><span class="w"> </span><span class="nt">"someEndpoint"</span><span class="err">}</span></code>: add some number of remote workers on the endpoint in the pool.</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li><code class="highlighter-rouge">callback</code>: called when all workers are spawned, and connections are established.</li>
+</ul>
+
+<h2 id="broadcast-scope">Broadcast Scope</h2>
+
+<p>Broadcast scope is the center of all magic. In your code which is executed remotely, all the local variables are not accessible (of course!) and you can use broadcast scope to make them available.</p>
+
+<p><code class="highlighter-rouge">var $=accel();</code> will create a new broadcast scope. It is recommended to use separate scope for every .js file to achieve scope isolations. When functions in some scope are executed remotely, the scope will be synchronized automatically and incrementally to broadcast the variables.</p>
+
+<p>The broadcast scope is nothing more than a js-object, just read/write values by <code class="highlighter-rouge">$.someKey=someValue</code> or <code class="highlighter-rouge">$["someKey"]=someValue</code>.</p>
+
+<p>The scope can also be used as a function, in order to register worker-functions:</p>
+
+<h3 id="register-worker-functions-somefunction-mode">Register worker-functions: <code class="highlighter-rouge">$(someFunction, [mode])</code></h3>
+
+<ul>
+  <li><code class="highlighter-rouge">someFunction</code>: a function that will be executed remotely. If the function has name, it can be called later by accessing the broadcast scope (<code class="highlighter-rouge">$.funcName(...)</code>); if the function is anonymous, it can only be called at once (<code class="highlighter-rouge">$(function(){xxx})(...)</code>).</li>
+  <li><code class="highlighter-rouge">mode</code> (optional): define the mode of the function, default is <code class="highlighter-rouge">"sync"</code>
+    <ul>
+      <li><code class="highlighter-rouge">"sync"</code>: the function is working in a synchronous way, its result will be returned as soon as the function exit.</li>
+      <li><code class="highlighter-rouge">"async"</code>: the function is an asynchronous one, and abide the convention that the last parameter is the callback. The result will be passed by the parameter of callback.</li>
+    </ul>
+  </li>
+</ul>
+
+<p>**Note: **</p>
+
+<ul>
+  <li>
+    <p><strong>Synchronizing broadcast scope is not free, so reusing variables helps keeping programs fast. Anonymous function is a one-time function and will never be reused, therefore not recommended.</strong></p>
+  </li>
+  <li>
+    <p><strong>Syncing is achieved by JSON, therefore unable to reserve prototype chain, function-in-object, etc., although function directly as value will be reserved (as shown below). To use nested objects with prototype and functions remotely please use homogeneous dependency.</strong></p>
+
+    <div class="language-javascript highlighter-rouge"><pre class="highlight"><code><span class="nx">$</span><span class="p">.</span><span class="nx">x1</span><span class="o">=</span><span class="p">{</span><span class="na">func</span><span class="p">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{...}};</span>		<span class="c1">// func will not be reserved</span>
+<span class="nx">$</span><span class="p">.</span><span class="nx">x2</span><span class="o">=</span><span class="kd">function</span><span class="p">()</span> <span class="p">{...};</span>			  	<span class="c1">// good to go!</span>
+</code></pre>
+    </div>
+
+    <p>​</p>
+  </li>
+</ul>
+
+<h3 id="invoke-worker-functions">Invoke worker-functions</h3>
+
+<p>For synchronous function, pass all the parameters as normal, plus a trailing function as callback:</p>
+
+<div class="language-javascript highlighter-rouge"><pre class="highlight"><code><span class="kd">function</span> <span class="nx">someFunction</span><span class="p">(</span><span class="nx">arg1</span><span class="p">,</span> <span class="nx">arg2</span><span class="p">)</span> <span class="p">{}</span>
+<span class="nx">$</span><span class="p">(</span><span class="nx">someFunction</span><span class="p">);</span>
+<span class="nx">$</span><span class="p">.</span><span class="nx">someFunction</span><span class="p">(</span><span class="nx">arg1</span><span class="p">,</span> <span class="nx">arg2</span><span class="p">,</span> <span class="p">(</span><span class="nx">res</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="c1">// now the function has completed</span>
+<span class="p">});</span>
+</code></pre>
+</div>
+
+<p>For asynchronous function, call the function as it is.</p>
+
+<div class="language-javascript highlighter-rouge"><pre class="highlight"><code><span class="kd">function</span> <span class="nx">someAsyncFunc</span><span class="p">(</span><span class="nx">arg1</span><span class="p">,</span> <span class="nx">arg2</span><span class="p">,</span> <span class="nx">callback</span><span class="p">)</span> <span class="p">{}</span>
+<span class="nx">$</span><span class="p">(</span><span class="nx">someAsyncFunc</span><span class="p">,</span> <span class="s2">"async"</span><span class="p">);</span>
+<span class="nx">$</span><span class="p">.</span><span class="nx">someAsyncFunc</span><span class="p">(</span><span class="nx">arg1</span><span class="p">,</span> <span class="nx">arg2</span><span class="p">,</span> <span class="p">(</span><span class="nx">params</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+	<span class="c1">// now the function has completed</span>
+<span class="p">});</span>
+</code></pre>
+</div>
+
+<p>Besides, all the remote functions can be decorated before called:</p>
+
+<div class="language-javascript highlighter-rouge"><pre class="highlight"><code><span class="nx">$</span><span class="p">.</span><span class="nx">someFunction</span><span class="p">(</span><span class="nx">arg1</span><span class="p">,</span> <span class="nx">arg2</span><span class="p">,</span> <span class="p">(</span><span class="nx">res</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span> <span class="p">});</span>	<span class="c1">// normal invocation</span>
+<span class="nx">$</span><span class="p">.</span><span class="nx">someFunction</span><span class="p">.</span><span class="nx">urgent</span><span class="p">()(</span><span class="nx">arg1</span><span class="p">,</span> <span class="nx">arg2</span><span class="p">,</span> <span class="p">(</span><span class="nx">res</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span> <span class="p">});</span>	<span class="c1">// urgent invocation, the task will be scheduled first</span>
+<span class="nx">$</span><span class="p">.</span><span class="nx">someFunction</span><span class="p">.</span><span class="nx">to</span><span class="p">(</span><span class="mi">2</span><span class="p">)(</span><span class="nx">arg1</span><span class="p">,</span> <span class="nx">arg2</span><span class="p">,</span> <span class="p">(</span><span class="nx">res</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span> <span class="p">});</span>	<span class="c1">// targeted invocation, the task will be assigned to node 2</span>
+<span class="nx">$</span><span class="p">.</span><span class="nx">someFunction</span><span class="p">.</span><span class="nx">toAll</span><span class="p">()(</span><span class="nx">arg1</span><span class="p">,</span> <span class="nx">arg2</span><span class="p">,</span> <span class="p">(</span><span class="nx">res</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span> <span class="p">});</span>	<span class="c1">// cohert invocation, each node will execute this task exactly once</span>
+</code></pre>
+</div>
+
+<h2 id="homogeneous-dependency">Homogeneous Dependency</h2>
+
+<p>In most cases, it is required to import some packages outside in worker functions. This is achieved by introducing homogeneous dependency:</p>
+
+<div class="language-javascript highlighter-rouge"><pre class="highlight"><code><span class="nx">$</span><span class="p">.</span><span class="nx">os</span><span class="o">=</span><span class="nx">accel</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"os"</span><span class="p">);</span>
+<span class="nx">$</span><span class="p">.</span><span class="nx">localPackage</span><span class="o">=</span><span class="nx">accel</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"./localPackage"</span><span class="p">);</span>
+
+<span class="nx">$</span><span class="p">.</span><span class="nx">os</span><span class="p">.</span><span class="nx">platform</span><span class="p">();</span>		<span class="c1">// you can invoke it locally</span>
+<span class="nx">$</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nx">$</span><span class="p">.</span><span class="nx">os</span><span class="p">.</span><span class="nx">platform</span><span class="p">();</span>	<span class="c1">// or invoke it remotely</span>
+<span class="p">})((</span><span class="nx">res</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="c1">// do something</span>
+<span class="p">});</span>
+</code></pre>
+</div>
+
+<p><strong>Note: Only use it after assigning to a broadcast scope.</strong></p>
+
+<p><code class="highlighter-rouge">$.os=accel.require("os");</code> is OK, while <code class="highlighter-rouge">var os=accel.require("os");</code> is not ok.</p>
+
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        
+        <p class="copyright">accel.js maintained by <a href="https://github.com/levythu">levythu</a></p>
+        
+        <p>Published with <a href="https://pages.github.com/">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+  
+
+</body></html>
