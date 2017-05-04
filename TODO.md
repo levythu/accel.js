@@ -4,9 +4,11 @@
         - [ ] distributed .map, .filter, .reduce, .reduceByKey
     - [ ] Distributed Map
         - [ ] distributed .map, .filter, .get, .put, ...
-    - [ ] Auto defer task sending
-    - [ ] All to all communication
-    - [ ] Channel
+    - [ ] <del>Auto defer task sending</del>
+    - [x] All to all communication
+    - [x] Channel
     - [x] Decorated remote functions
 - [ ] Distributed Env
+    - [ ] Deamon
+    - [ ] Auto-launch, sync script as command
 - [ ] Support browser by web worker
