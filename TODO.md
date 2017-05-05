@@ -2,8 +2,8 @@
     - [x] MPI method among workers (direct socket? shared file in mem? forwarded by master?)
     - [ ] Distributed List
         - [ ] distributed .map, .filter, .reduce, .reduceByKey
-    - [ ] Distributed Map
-        - [ ] distributed .map, .filter, .get, .put, ...
+    - [ ] <del>Distributed Map</del>
+        - [ ] <del>distributed .map, .filter, .get, .put, ...</del>
     - [ ] <del>Auto defer task sending</del>
     - [x] All to all communication
     - [x] Channel
