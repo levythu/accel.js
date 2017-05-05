@@ -4,7 +4,8 @@
   "description": "Gracefully parallelize Node.js on multi-cores and multi-nodes",
   "main": "lib/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+      "test": "echo \"Error: no test specified\" && exit 1",
+      "postinstall": "npm link accel"
   },
   "repository": {
     "type": "git",
@@ -17,6 +18,9 @@
   "dependencies": {
       "caller": "1.0.1",
       "json-socket": "*"
+  },
+  "bin": {
+      "acceljs": "bin/launcher.js"
   },
   "contributors": [
       {
