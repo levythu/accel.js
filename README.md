@@ -97,6 +97,11 @@ You don't have to wait for the callback before using any functionalities of `acc
     - [Not supported yet] `{remote: workerCount, endPoint: "someEndpoint"}`: add some number of remote workers on the endpoint in the pool.
 - `callback`: called when all workers are spawned, and connections are established.
 
+**Note:**
+
+- **Do all the operations in callback to ensure everything is done**
+
+
 ##  Broadcast Scope
 
 Broadcast scope is the center of all magic. In your code which is executed remotely, all the local variables are not accessible (of course!) and you can use broadcast scope to make them available.
@@ -114,7 +119,7 @@ The scope can also be used as a function, in order to register worker-functions:
   - `"sync"`: the function is working in a synchronous way, its result will be returned as soon as the function exit.
   - `"async"`: the function is an asynchronous one, and abide the convention that the last parameter is the callback. The result will be passed by the parameter of callback.
 
-**Note: **
+**Note:**
 
 - **Synchronizing broadcast scope is not free, so reusing variables helps keeping programs fast. Anonymous function is a one-time function and will never be reused, therefore not recommended.**
 
@@ -177,3 +182,43 @@ $(function() {
 **Note: Only use it after assigning to a broadcast scope.**
 
 `$.os=accel.require("os");` is OK, while `var os=accel.require("os");` is not ok.
+
+## Channel
+
+Accel.js also has wonderful support for MPI jobs. After launched, the workers talk to each other by channel.
+
+### Broadcast Channel
+Broadcast Channel is a [Golang style](https://tour.golang.org/concurrency/2) multi-consumer-multi-producer channel that is accessible by all the workers as well as master. Everyone can act as a producer and a consumer, i.e., send to the channel or receive from the channel. The receiving function will not callback before anything is received, while the sending function will not callback when the buffer is full.
+
+Use the simple API to create a broadcast channel:
+
+```javascript
+$.c=new accel.Channel([bufferSize]);
+```
+
+Where the parameter is the size of channel, which by default is 0.
+
+### Unicast Channel
+
+Unicast Channel has the same API as broadcast channel (see below), but only support the communication between two which are specified in creation. Since unicast channel utilize direct IPC between workers instead of being controlled by master, it has lower latency.
+
+Use similar API to create a unicast channel:
+
+```javascript
+$.c=new accel.Channel(participant1, participant2[, bufferSize]);
+```
+
+In which participant is the number of workers, or -1 for master.
+
+### Channel API
+
+After creation (and potentially synchronizing via broadcast scope), channel can be accessed by `Recv` and `Send` (for broadcast, everyone can access the channel, while for unicast channel, non-specified access results in exception)
+
+#### `Channel.Send(obj[, callback])`
+
+- `obj`: a js-object that will be serialized and sent.
+- `callback` (optinal): called when the object is successfully received or enters the buffer of channel.
+
+#### Channel.Recv([callback])
+
+- `callback` (optional): called when a new object is received, which is passed as the first parameter. If no callback is presented, it only tries to receive an object and discards it.
