@@ -3,10 +3,10 @@ Accelerate your Node.js codes on multicores and multi-nodes with no efforts!
 
 ## Quick Start
 
-Install `accel.js`:
+Install `accel.js`: (root privilege may be required if npm is configured to store packages in `/usr`)
 
 ```shell
-npm install --save accel
+npm install -g accel
 ```
 
 Write a program with computational intensive functions
@@ -37,7 +37,6 @@ function cpuIntensive(n) {
 }
 $(cpuIntensive);
 
-accel.init();
 for (var i=10000; i<20000; i++) {
     $.cpuIntensive(i, (result) => {
         console.log(result);
@@ -58,7 +57,6 @@ $(function generatePseudoRandom(next) {
     return Math.floor(next/65536) % 32768;
 });
 
-accel.init();
 $.generatePseudoRandom(50, (res) => {
     console.log(res);
 });
@@ -77,17 +75,26 @@ $(function readAndCalculate(callback) {
     });
 }, "async");
 
-accel.init();
 $.readAndCalculate((res) => {
     console.log(res);
 });
 ```
 
-## Initialization
+## Launch
 
-Any application using `accel.js` should initialize it **exactly once**, you can specify how many local workers (run on local CPUs) and how many remote workers (run on other machines) are in the workers pool.
+### Launch via `acceljs`
 
-You don't have to wait for the callback before using any functionalities of `accel.js`. Those who rely on the connections among workers will be deferred automatically.
+`accel.js` provides an easy tools for launching parallelized node.js codes, simply use
+
+```shell
+acceljs yourNodeJSCode.js
+```
+
+is okay. By the means, there's no need to launch `accel.js` inside your application. For more information, use `acceljs --help` to view usage.
+
+### Launch in your own app (NOT RECOMMENDED)
+
+Sometimes your may not want to use `acceljs` to launch your parallelized app (why not?). Then you can launch it in your codes, via `accel.init()`, which should be called **exactly once**, you can specify how many local workers (run on local CPUs) and how many remote workers (run on other machines) are in the workers pool.
 
 ### `accel.init(options, [callback])`
 
