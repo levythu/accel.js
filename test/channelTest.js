@@ -2,7 +2,7 @@ var accel=require("../lib/index");
 var $=accel();
 
 var nop=()=>1;
-accel.init({env: [{local: 4}]}, function(err) {
+accel.init({env: [{local: 2}]}, function(err) {
     $.c=new accel.Channel(2);
     $(function run(callback) {
         console.log("Node", accel.id, "Running");

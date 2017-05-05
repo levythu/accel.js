@@ -219,6 +219,12 @@ After creation (and potentially synchronizing via broadcast scope), channel can 
 - `obj`: a js-object that will be serialized and sent.
 - `callback` (optinal): called when the object is successfully received or enters the buffer of channel.
 
-#### Channel.Recv([callback])
+#### `Channel.Recv([callback])`
 
 - `callback` (optional): called when a new object is received, which is passed as the first parameter. If no callback is presented, it only tries to receive an object and discards it.
+
+#### `Channel.Dump(callback)`
+
+Repeatedly receiving messages, calling callback and deciding whether to receive next based on the return value of callback.
+
+- `callback`: called each time when a new message is received. And if callback returns true, channel will start to wait for the next message; terminate waiting otherwise.
