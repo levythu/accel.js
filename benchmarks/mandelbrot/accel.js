@@ -4,8 +4,8 @@ var accel=require("accel");
 var $=accel();
 $.k=accel.require("./kernel");
 
-const width = 1200;
-const height = 800;
+const width = 6000;
+const height = 4000;
 const maxIterations = 256;
 const x0 = -2;
 const x1 = 1;
@@ -28,7 +28,7 @@ function onFinish(res) {
     times--;
     if (times>0) {
         console.log("Left", times);
-        $.mandel_range_remote(x0, y0, x1, y1, width, height, 0, height, maxIterations, 0.2, onFinish);
+        $.mandel_range_remote(x0, y0, x1, y1, width, height, 0, height, maxIterations, onFinish);
     } else {
         var after=(new Date()).getTime();
         console.log("Running", 1, "times with time", after-now, "ms");
@@ -36,4 +36,4 @@ function onFinish(res) {
     }
 }
 
-$.mandel_range_remote(x0, y0, x1, y1, width, height, 0, height, maxIterations, 0.2, onFinish);
+$.mandel_range_remote(x0, y0, x1, y1, width, height, 0, height, maxIterations, onFinish);

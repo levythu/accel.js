@@ -18,17 +18,15 @@ function mandel(c_re, c_im, count)
 function mandel_range(x0, y0, x1, y1,
                       width, height,
                       startRow, totalRow,
-                      maxIter, stepSize=1) {
-    console.log(startRow, totalRow);
-
+                      maxIter) {
     var dx = (x1 - x0) / width;
     var dy = (y1 - y0) / height;
 
     var endRow = startRow + totalRow;
 
     var result=[];
-    for (var j = startRow; j < endRow; j+=stepSize) {
-        for (var i = 0; i < width; i+=stepSize) {
+    for (var j = startRow; j < endRow; j++) {
+        for (var i = 0; i < width; i++) {
             var x = x0 + i * dx;
             var y = y0 + j * dy;
 
