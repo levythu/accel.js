@@ -8,6 +8,7 @@
     - [x] All to all communication
     - [x] Channel
     - [x] Decorated remote functions
+    - [ ] Error handling
 - [ ] Distributed Env
     - [ ] Deamon
     - [ ] Auto-launch, sync script as command
