@@ -1,11 +1,10 @@
 {
   "name": "accel",
-  "version": "0.0.8",
+  "version": "0.0.13",
   "description": "Gracefully parallelize Node.js on multi-cores and multi-nodes",
   "main": "lib/index.js",
   "scripts": {
-      "test": "echo \"Error: no test specified\" && exit 1",
-      "postinstall": "npm link accel"
+      "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
