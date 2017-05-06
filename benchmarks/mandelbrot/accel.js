@@ -1,7 +1,6 @@
-var time=require("../timing");
-
 var accel=require("accel");
 var $=accel();
+$.time=require("../timing");
 $.k=accel.require("./kernel");
 
 const width = 6000;
@@ -13,9 +12,11 @@ const y0 = -1;
 const y1 = 1;
 
 $(function mandel_range_remote() {
-    var res=$.k.mandel_range.apply(null, Array.from(arguments));
     var sum=0;
-    for (var i=0; i<res.length; i++) sum+=res[i];
+    $.time(() => {
+        var res=$.k.mandel_range.apply(null, Array.from(arguments));
+        for (var i=0; i<res.length; i++) sum+=res[i];
+    })
     return sum;
 });
 
