@@ -1,15 +1,21 @@
-- [ ] Basic
+- [x] Basic
     - [x] MPI method among workers (direct socket? shared file in mem? forwarded by master?)
     - [ ] Distributed List
         - [ ] distributed .map, .filter, .reduce, .reduceByKey
     - [ ] <del>Distributed Map</del>
         - [ ] <del>distributed .map, .filter, .get, .put, ...</del>
-    - [ ] <del>Auto defer task sending</del>
+    - [x] <del>Auto defer task sending</del>
     - [x] All to all communication
     - [x] Channel
+    - [ ] point-to-point channel
     - [x] Decorated remote functions
-    - [ ] Error handling
+    - [x] Error handling
+    - [x] AutoLauncher
 - [ ] Distributed Env
-    - [ ] Deamon
+    - [x] Deamon
     - [ ] Auto-launch, sync script as command
+- [ ] Evaluation
+    - [x] Mandelbrot
+    - [ ] fontmin
+    - [ ] what else?
 - [ ] Support browser by web worker
