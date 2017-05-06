@@ -16,3 +16,5 @@ var run=() => {
     console.log(sum);
 };
 time(run, 1);
+
+var run2=eval("("+run.toString()+")");
