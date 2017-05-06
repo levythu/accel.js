@@ -16,6 +16,7 @@
   ],
   "dependencies": {
       "caller": "1.0.1",
+      "ip": "^1.1.5",
       "json-socket": "*"
   },
   "bin": {
