@@ -8,7 +8,7 @@ plt.rcdefaults()
 fig, ax = plt.subplots()
 people = ('Serial', 'Parallel.js', 'Accel-1', 'Accel-2', 'Accel-4')
 y_pos = np.arange(len(people))
-performance = [5,4,3,2,1]
+performance = [7451.3,3983.4,2321.2,1000,500]
 ax.barh(y_pos, performance, align='center',
         color='green', ecolor='black')
 ax.set_yticks(y_pos)
