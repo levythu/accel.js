@@ -24,6 +24,8 @@ function parseArg() {
     function parseRemoteEnv() {
         var flag=process.argv.shift();
         var endpoint=process.argv.shift();
+        var port=process.argv.shift();
+        port=parseInt(port);
         var envCount=process.argv.shift();
         envCount=parseInt(envCount);
         if (isNaN(envCount)) {
@@ -32,7 +34,8 @@ function parseArg() {
             process.exit(-1);
         }
         if (!("env" in conf)) conf.env=[];
-        conf.env.push({remote: envCount, endpoint: endpoint});
+        conf.env.push({remote: envCount, port:port, endpoint: endpoint});
+        console.log(conf.env);
         confed=true;
     }
     function displayHelp() {
@@ -42,7 +45,7 @@ function parseArg() {
         console.log("If no OPTION is provided, read options from JSON file accel-config.json");
         console.log("");
         console.log("  -l, --env-local NUM\t", "Launch local workers with number NUM");
-        console.log("  -r, --remote-local ENDPOINT NUM\t", "Launch remote workers at ENDPOINT with number NUM");
+        console.log("  -r, --remote-local ENDPOINT PORT NUM\t", "Launch remote workers at ENDPOINT in PORT with number NUM");
         console.log("  -h, --help\t", "Display help and exit");
         console.log("");
         process.exit(0);
@@ -64,6 +67,8 @@ function parseArg() {
 }
 
 parseArg();
+console.log(process.cwd()); 
+console.log(process.argv[0]);
 var targetJS=path.join(process.cwd(), process.argv[0]);
 if (!confed) {
     try {
