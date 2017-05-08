@@ -1,7 +1,12 @@
 #!/usr/bin/env node
 
+var packageName="accel";
+if (process.env.ACCELJS_PATH!=null) {
+    packageName=process.env.ACCELJS_PATH;
+}
+
 const path=require("path");
-const accel=require("accel");
+const accel=require(packageName);
 const fs=require("fs");
 
 var confed=false;
@@ -67,8 +72,6 @@ function parseArg() {
 }
 
 parseArg();
-console.log(process.cwd()); 
-console.log(process.argv[0]);
 var targetJS=path.join(process.cwd(), process.argv[0]);
 if (!confed) {
     try {
