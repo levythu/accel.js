@@ -40,7 +40,6 @@ function parseArg() {
         }
         if (!("env" in conf)) conf.env=[];
         conf.env.push({remote: envCount, port:port, endpoint: endpoint});
-        console.log(conf.env);
         confed=true;
     }
     function displayHelp() {
