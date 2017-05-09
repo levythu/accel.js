@@ -1,7 +1,7 @@
 var k=require("./kernel");
 var time=require("../timing");
 
-const width = 6000;
+const width = 26000;
 const height = 4000;
 const maxIterations = 256;
 const x0 = -2;
