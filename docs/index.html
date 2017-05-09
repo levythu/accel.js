@@ -4,10 +4,12 @@
 <meta charset='UTF-8'><meta name='viewport' content='width=device-width initial-scale=1'>
 <title>index.md</title></head>
 <body><h2>Wonderful Features</h2>
+<h3>One-step Wrapper to Parallelize Function</h3>
+<p>Simply by wrapping one function with <code>$()</code>, you can get one distributed version and invoke it on workers. Note that in wrapped functions, you can only refer to <code>$</code> (synchronized environment) and <code>accel</code> (package itself).</p>
 <h3>Easy to Go Distributed</h3>
-<p>All you need to do to parallelize your Node.js application to multiple machines is modify your launching command, e.g., from <code>acceljs bar.js</code> to <code>acceljs -l 4 -r m1:15618 4 bar.js</code>. (For detail refer to <code>acceljs --help</code>)</p>
+<p>All you need to do to parallelize your Node.js application to multiple machines is modify your launching command, <em>e.g.</em>, from <code>acceljs bar.js</code> to <code>acceljs -l 4 -r m1:15618 4 bar.js</code>. (For detail refer to <code>acceljs --help</code>)</p>
 <h3>Environment Synchronization</h3>
-<p>Accel.js performs smart (delta sync) and transparent environment synchronization to help you transfer all data you want to workers.</p>
+<p>Accel.js performs smart (delta sync) and transparent environment synchronization to help you transfer all data you want to workers. Since it is delta synchronization, you won&#39;t pay for extra communication costs once transferred.</p>
 <pre><code class='language-javascript' lang='javascript'>
 const accel=require(&quot;accel&quot;);
 const $=accel();

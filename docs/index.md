@@ -1,12 +1,16 @@
 ## Wonderful Features
 
+### One-step Wrapper to Parallelize Function
+
+Simply by wrapping one function with `$()`, you can get one distributed version and invoke it on workers. Note that in wrapped functions, you can only refer to `$` (synchronized environment) and `accel` (package itself).
+
 ### Easy to Go Distributed
 
-All you need to do to parallelize your Node.js application to multiple machines is modify your launching command, e.g., from `acceljs bar.js` to `acceljs -l 4 -r m1:15618 4 bar.js`. (For detail refer to `acceljs --help`)
+All you need to do to parallelize your Node.js application to multiple machines is modify your launching command, *e.g.*, from `acceljs bar.js` to `acceljs -l 4 -r m1:15618 4 bar.js`. (For detail refer to `acceljs --help`)
 
 ### Environment Synchronization
 
-Accel.js performs smart (delta sync) and transparent environment synchronization to help you transfer all data you want to workers.
+Accel.js performs smart (delta sync) and transparent environment synchronization to help you transfer all data you want to workers. Since it is delta synchronization, you won't pay for extra communication costs once transferred.
 
 ```javascript
 const accel=require("accel");
