@@ -1,6 +1,6 @@
 var time=require("../timing");
 
-var accel=require("accel");
+var accel=require("../../lib/index");
 var $=accel();
 $.k=accel.require("./kernel");
 
