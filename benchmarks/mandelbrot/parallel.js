@@ -1,10 +1,10 @@
 var time = require("../timing");
 var Parallel = require("paralleljs")
 
-const width = 800;
-const height = 400;
+const width = 26000;
+const height = 4000;
 const maxIterations = 256;
-const chunkSize = 40;
+const chunkSize = 10;
 const x0 = -2;
 const x1 = 1;
 const y0 = -1;
