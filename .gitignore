@@ -1,0 +1,4 @@
+*.DS_Store
+.remote-sync.json
+node_modules/*
+*.exe
