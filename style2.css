@@ -22,3 +22,8 @@
 pre.prettyprint {
     color: white;
 }
+
+img.fixedHeight {
+    height: 25em;
+    box-shadow: 3px 3px 5px #aaa;
+}

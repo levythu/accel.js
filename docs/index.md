@@ -81,3 +81,8 @@ $(MPIJob, "async").toAll()(() => {
 | MPI Support                              | **YES**                          | NO                                       | **YES**                    |
 | Data-Parallel Support                    | On the way!                      | **YES**                                  | NO                         |
 
+### Performance
+
+![](../experiment/mandelbrot/mandelbrot.png)
+
+*All experiments are conducted on 4-core machines. Task to be done is rendering 26k x 4k mandelbrot graph.*
