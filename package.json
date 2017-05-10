@@ -1,6 +1,6 @@
 {
   "name": "accel",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "Gracefully parallelize Node.js on multi-cores and multi-nodes",
   "main": "lib/index.js",
   "scripts": {
