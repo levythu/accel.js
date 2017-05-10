@@ -72,9 +72,9 @@ acceljs bar.js</pre>
 <h2>Wonderful Features</h2>
 <h3>One-step Wrapper to Parallelize Function</h3>
 <p>Simply by wrapping one function with <code>$()</code>, you can get one distributed version and invoke it on workers. Note that in wrapped functions, you can only refer to <code>$</code> (synchronized environment) and <code>accel</code> (package itself).</p>
-<br><h3>Easy to Go Distributed</h3>
+<br/><h3>Easy to Go Distributed</h3>
 <p>All you need to do to parallelize your Node.js application to multiple machines is modify your launching command, <em>e.g.</em>, from <code>acceljs bar.js</code> to <code>acceljs -l 4 -r m1:15618 4 bar.js</code>. (For detail refer to <code>acceljs --help</code>)</p>
-<br><h3>Environment Synchronization</h3>
+<br/><h3>Environment Synchronization</h3>
 <p>Accel.js performs smart (delta sync) and transparent environment synchronization to help you transfer all data you want to workers. Since it is delta synchronization, you won&#39;t pay for extra communication costs once transferred.</p>
 <pre class="prettyprint">
 const accel=require(&quot;accel&quot;);
@@ -86,7 +86,7 @@ $(function foo(n) {
     // you can use $.mixNumber and $.alpha here
 });
 </pre>
-<br><h3>Asynchronous Function on Worker</h3>
+<br/><h3>Asynchronous Function on Worker</h3>
 <p>Although Accel.js by default treats one function as completed in return, you can explicitly assign an asynchronous function to worker and it will not be marked completed until callback is invoked.</p>
 <pre class="prettyprint">
 function bar(time, callback) {
@@ -96,7 +96,7 @@ $(bar, &quot;async&quot;)(1000, (res) =&gt; {
     // will get here after 1000ms
 });
 </pre>
-<br><h3>Universal Dependency</h3>
+<br/><h3>Universal Dependency</h3>
 <p>When you want to require a dependency for worker, you don&#39;t have to do it once in every worker code. Instead, take our universal dependency and use it everywhere.</p>
 <pre class="prettyprint">
 $.os=accel.require(&quot;os&quot;);    // introduce an universal dependency
@@ -106,7 +106,7 @@ function printOS() {
 console.log(printOS);    // you can use it on master
 $(printOS)((res) =&gt; console.log(res));  // or use it on worker
 </pre>
-<br><h3>MPI Support</h3>
+<br/><h3>MPI Support</h3>
 <p>Accel.js also have brilliant support for MPI jobs, where you assign long running jobs for each node (instead of assigned by job queues) and each job communicate with each other.</p>
 <pre class="prettyprint">
 $.ch1=new accel.Channel();  // a multi-producer-multi-consumer channel
@@ -122,8 +122,8 @@ $(MPIJob, &quot;async&quot;).toAll()(() =&gt; {
 });
 </pre>
 
-<br><h3>More...</h3>
-<p><i>For complete list of features chck out <a href="./docs.html">documentation</a></i></p><br>
+<br/><h3>More...</h3>
+<p><i>For complete list of features chck out <a href="./docs.html">documentation</a></i></p><br/>
 
 
 <h2>Evaluation</h2>
