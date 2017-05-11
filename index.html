@@ -138,6 +138,20 @@ $(MPIJob, &quot;async&quot;).toAll()(() =&gt; {
     <em>2. Comparison between Accel-1 and Parallel.js, with trailing -k as the number of subtasks.</em>
 </p>
 
+<h3>Webfont Subsetting Service</h3>
+<p>
+    <img class="fixedHeight" src='./experiment/fontmin/1.png' style="height:18em;" alt='' />
+    <img class="fixedHeight" src='./experiment/fontmin/2.png' style="height:18em;" alt='' />
+    <img class="fixedHeight" src='./experiment/fontmin/3.png' style="height:18em;" alt='' />
+</p>
+<p><em>1. All experiments are conducted on one 4-core machine.</em>
+    <br/>
+    <em>2. Webfont subsetting service is a Google Font like web app, which receives an URL, crawls its data and subset a large font file.
+        The task is both Disk-I/O-intensive (read and write the font file (~10MBs)) and CPU-intensive (parse the font and setup index in memory)</em>
+            <br/>
+    <em>3. To simulate real workload, all servers are implemented with cache, and it takes almost no time to serve a cache hit.</em>
+</p>
+
 <p><em>More Evaluations on the way!</em></p>
 
       </section>
