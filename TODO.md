@@ -16,6 +16,6 @@
     - [ ] Auto-launch, sync script as command
 - [ ] Evaluation
     - [x] Mandelbrot
-    - [ ] fontmin
-    - [ ] what else?
+    - [x] fontmin
+    - [ ] Maybe... 618 hw4?
 - [ ] Support browser by web worker
