@@ -35,4 +35,18 @@ router.get("/a", (req, res) => {
     });
 });
 
+var parallelKernel=require("./kernel.parallel");
+router.get("/p", (req, res) => {
+    if (req.query.text==null) req.query.text="default";
+    if (req.query.text in cache) {
+        res.send(cache[req.query.text]);
+        return;
+    }
+    parallelKernel((r) => {
+        cache[req.query.text]=r;
+        res.send(cache[req.query.text]);
+        return;
+    });
+});
+
 module.exports=router;
