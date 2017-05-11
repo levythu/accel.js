@@ -19,7 +19,7 @@ function rq() {
 
     var thisNumber;
     var cacheHit=false;
-    if (Math.random()<cacheHitRate) {
+    if (Math.random()<cacheHitRate && requestedNumber>0) {
         thisNumber=0;
         cacheHit=true;
     } else {
