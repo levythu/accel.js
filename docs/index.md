@@ -69,17 +69,18 @@ $(MPIJob, "async").toAll()(() => {
 
 ## Comparison
 
-|                                          | Accel.js                         | [Parallel.js](https://github.com/parallel-js/parallel.js) (Rockstar with 2K+ stars) | Cluster (Node.js original) |
-| ---------------------------------------- | -------------------------------- | ---------------------------------------- | -------------------------- |
-| Computational Resources                  | **Local Cores & Cluster Cores**  | Local Cores                              | Local Cores                |
-| Lines of Code for Similar Tasks (Mandelbrot, ~20 for serial) | **~40**                          | ~60                                      | ~80                        |
-| Load Balancing Assignment                | **YES**                          | **YES**                                  | NO                         |
-| Manual Assignment                        | **YES**                          | NO                                       | **YES**                    |
-| Asynchronous Job Support                 | **YES**                          | NO                                       | **YES**                    |
-| Overhead per Job                         | **LOW**                          | HIGH                                     | **LOW**                    |
-| Data Synchronization Mechanism           | **Transparent sync environment** | One string only                          | One string only            |
-| MPI Support                              | **YES**                          | NO                                       | **YES**                    |
-| Data-Parallel Support                    | On the way!                      | **YES**                                  | NO                         |
+|                                          | Accel.js                             | [Parallel.js](https://github.com/parallel-js/parallel.js) (Rockstar with 2K+ stars) | Cluster (Node.js original)  |
+| ---------------------------------------- | ------------------------------------ | ---------------------------------------- | --------------------------- |
+| Computational Resources                  | **Local Cores & Cluster Cores**      | Local Cores                              | Local Cores                 |
+| Lines of Code for Similar Tasks (Mandelbrot, ~20 for serial) | **~40**                              | ~60                                      | ~80                         |
+| Load Balancing Assignment                | **YES**                              | **YES**                                  | NO                          |
+| Manual Assignment                        | **YES**                              | NO                                       | **YES**                     |
+| Asynchronous Job Support                 | **YES**                              | NO                                       | **YES**                     |
+| Overhead per Job                         | **LOW**                              | HIGH                                     | **LOW**                     |
+| Data Synchronization Mechanism           | **Transparent sync environment**     | One string only                          | One string only             |
+| Communication                            | **Anytime, to Anyone (via Channel)** | On Spawn only, Master-Worker only        | Anytime, Master-Worker only |
+| MPI Support                              | **YES**                              | NO                                       | **YES**                     |
+| Data-Parallel Support                    | On the way!                          | **YES**                                  | NO                          |
 
 ### Performance
 
