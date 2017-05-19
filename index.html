@@ -29,8 +29,7 @@
           <h2 id="project_tagline">Accelerating your Node.js program by parallelizing computation with multicores and multinodes.</h2>
           <a href="." style="display:inline-block; padding-right:2em;" class="disabledHref">Index</a>
           <a href="./docs.html" style="display:inline-block; padding-right:2em;">Documentation</a>
-          <a href="./proposal.html" style="display:inline-block; padding-right:2em;">Proposal</a>
-          <a href="./checkpoint.html" style="display:inline-block; padding-right:2em;">Checkpoint</a>
+          <a href="./final.html" style="display:inline-block; padding-right:2em;">Archive for 15-418 Competition</a>
           <br/><br/>
 
           <pre class="prettyprint">
@@ -61,168 +60,98 @@ acceljs bar.js</pre>
     <div id="main_content_wrap" class="outer">
       <section id="main_content" class="inner">
 
-<h1>Final Report</h1>
-<p>Leiyu Zhao(leiyuz), Hailiang Xu(hailianx)</p>
-<h2>Summary</h2>
-<p>Accelerating your Node.js program by parallelizing computation with multi-cores and multi-nodes.</p>
-<h2>Background</h2>
-<p>According to the Stackoverflow 2016 developer survey[1], javascript is the most popular technology in computer science. However, due to the native features of javascript, it&#39;s not a resident in the parallel programming world! Javascript adopts event-based, non-preemptive model running on a single thread. There is a main event loop that waits for events and calls the corresponding event handlers. Although the event handlers are independent control flows, they run on a single thread in a non-preemptive way, which means the functions won&#39;t give out the control unless it returns. Therefore, a CPU intensive job will block all other events. This is the motivation of Accel.js.</p>
-<h3>Challenge</h3>
-<h4>No shared memory multi-process model</h4>
-<p>As mentioned in the background, Node.js exposes no thread-like interfaces to developer, so the only way to utilize multiple cores are multi-process. Since they cannot share the same address space, communications among different processes are harder and may require higher overheads. How to achieve good speedup considering the overheads is a great challenge. And we need to compress the overhead as much as possible.</p>
-<h4>How to implement graceful API for Javascript</h4>
-<p>Unlike Python, ECMAScript (Javascript) does not support many grammar tricks (e.g. function decorator and operator overloading). Therefore, it is hard to implement intuitive and graceful API to parallelize computing. A counter-example is the builtin package for Node.js, <a href='https://nodejs.org/api/cluster.html'>cluster</a>, which makes parallel computing almost no easier than do it from scratch.</p>
-<p>Since our goal is to make life easier, it is very essential to address the challenge.</p>
-<p></p>
-<h2>Approach</h2>
-<p>Instead of implementing customized JIT interpreter, we implement Accel.js APIs as a library, which is released on <a href='https://www.npmjs.com/package/accel'>NPM</a>. The detailed implementation (components protocols &amp; APIs) is as follows:</p>
-<h3>Architecture</h3>
-<p><img class="fixedHeight" src='docs/img/-1.png' alt='' /></p>
-<p></p>
-<p>This is the overall architecture of our library. As in this graph, the master will launch workers in local CPU cores. It can also contact remote daemon to create remote workers. Each working is mapping to a CPU core. During the execution of master, it can push CPU intensive jobs to a centralized job queue. The workers will offload the computation from master to prevent long-time blocking. </p>
-<h3>Protocols</h3>
-<h4>2-Phase Connect Protocol</h4>
-<p>The 2-Phase Connect Protocol(2PC) is used to create communication channels between master and workers as well as workers and workers (full connection). Each communication channel is implemented in a TCP socket.
-In fact, local workers can use native pipe instead of socket. However, we conducted several experiments. And the results show that there is abnormal long latency. We don’t really know the implementation of Node.js. But similar issue is in online community as well. As a result, we adopt socket for local worker as well as remote worker. The code can be reused as well.</p>
-<h5>Phase 1</h5>
-<p><img class="fixedHeight" src='docs/img/2.png' alt='' /></p>
-<p></p>
-<p>The master will connect to every worker in this node and maintain a list of (id, port) pair. This data structure will be broadcasted in phase 2 to create full connection between workers. Note here the connect process is slightly different for remote worker. The master will first contact remote daemon. Remote daemon is responsible to launch remote workers. </p>
-<h5>Phase 2</h5>
-<p><img class="fixedHeight" src='docs/img/1.png' alt='' /></p>
-<p></p>
-<p>After phase 1, the master knows the listening port for every worker. It will broadcast it to every worker. The worker will initialize connection to every other worker. After the full connection created, every worker will reply with a “fully connected” message. When master receives all ACK, 2PC ends.</p>
-<h4>Task Pulling Protocol</h4>
-<p><img class="fixedHeight" src='docs/img/0.png' alt='' /></p>
-<p>How do workers get task? There is a centralized job queue. During the execution, the master will push CPU intensive jobs. Workers will pull tasks from the job queue. After execution, it will return the results and start a new round. We optimized the process by merging report of the last round and pull in the new round messages into one single message to reduce overhead.</p>
-<h4>CMsg Protocol</h4>
-<p>CMsg (stands for Customized Message) is implemented for communication between extended distributed data structure (e.g. Channel, incoming RDD, etc.). It is built on communication socket and for each node, there’s a CMsgRouter for sending, receiving and routing CMsg.</p>
-<p>Extended distributed data structure registers itself on CMsgRouter on creation, and then it will be able to receive CMsg from its peers in other workers (or master).</p>
-<p>This design fully decouples data structures from the communication layer, making it extremely easy for future extension.</p>
-<h3>API List</h3>
-<p><em>Refer to <a href='https://levythu.github.io/accel.js/docs.html'>Accel.js Documentation</a> for detailed API</em></p>
-<h4><code>acceljs</code></h4>
-<p>The binary installed by npm to launch your application in replace of Nodejs (e.g. <code>npm yourApp.js</code>). You can specify the number of local workers as well as remote workers (you need to specify the endpoint of daemon for remote workers) that run the app. For more detail check out <code>acceljs --help</code>.</p>
-<h4><code>accel-daemon</code></h4>
-<p>The binary installed by npm to launch a remote daemon at one machine on some endpoint. Check out <code>accel-deamon --help</code> for more details.</p>
-<h4>Synchronization Scope</h4>
-<p>Synchronization scope is the center of all magic. In your code which is executed remotely, all the local variables are not accessible (of course!) and you can use synchronization scope to make them available transparently.</p>
-<p><code>var $=accel();</code> will create a new synchronization scope. It is recommended to use separate scope for every .js file to achieve scope isolations. When functions in some scope are executed remotely, the scope will be synchronized automatically to broadcast the variables. It’s noteworthy that the scope is synchronized incrementally, which means that it will not require any more traffic once it is transferred.</p>
-<p>The broadcast scope is nothing more than a js-object, just read/write values by <code>$.someKey=someValue</code> or <code>$[&quot;someKey&quot;]=someValue</code>.</p>
-<p>The scope can also be used as a function, in order to register worker-functions:</p>
-<h5>Register worker-functions: <code>$(someFunction, [mode])</code></h5>
-<ul><li>
-<code>someFunction</code>: a function that will be executed remotely. If the function has name, it can be called later by accessing the synchronization scope (<code>$.funcName(...)</code>); if the function is anonymous, it can only be called at once (<code>$(function(){xxx})(...)</code>).</li>
-<li>
-<code>mode</code> (optional): define the mode of the function, default is &quot;sync&quot;</li>
-<li>
-&quot;sync&quot;: the function is working in a synchronous way, its result will be returned as soon as the function exit.</li>
-<li>
-&quot;async&quot;: the function is an asynchronous one, and abide the convention that the last parameter is the callback. The result will be passed by the parameter of callback.</li>
-</ul>
-<h4>Invoke the worker-functions</h4>
-<p>For synchronous function, pass all the parameters as normal, plus a trailing function as callback:</p>
-<pre class="prettyprint">
-function someFunction(arg1, arg2) {}
-$(someFunction);
-$.someFunction(arg1, arg2, (res) =&gt; {
-    // now the function has completed
-});
-</pre>
-<p>For asynchronous function, call the function as it is.</p>
-<pre class="prettyprint">
-function someAsyncFunc(arg1, arg2, callback) {}
-$(someAsyncFunc, &quot;async&quot;);
-$.someAsyncFunc(arg1, arg2, (params) =&gt; {
-	// now the function has completed
-});
-</pre>
-<p>Besides, all the remote functions can be decorated before called:</p>
-<pre class="prettyprint">
-$.someFunction(arg1, arg2, (res) =&gt; { });	// normal invocation
-$.someFunction.urgent()(arg1, arg2, (res) =&gt; { });	// urgent invocation, the task will be scheduled first
-$.someFunction.to(2)(arg1, arg2, (res) =&gt; { });	// targeted invocation, the task will be assigned to node 2
-$.someFunction.toAll()(arg1, arg2, (res) =&gt; { });	// cohert invocation, each node will execute this task exactly once
-</pre>
-<h4>Homogeneous Dependency</h4>
-<p>In most cases, it is required to import some packages outside in worker functions. This is achieved by introducing homogeneous dependency:</p>
-<pre class="prettyprint">
-$.os=accel.require(&quot;os&quot;);
-$.localPackage=accel.require(&quot;./localPackage&quot;);
 
-$.os.platform();		// you can invoke it locally
-$(function() {
-    return $.os.platform();	// or invoke it remotely
-})((res) =&gt; {
-    // do something
+<h2>Comparison</h2>
+<table>
+<thead>
+<tr><th></th><th>Accel.js</th><th><a href='https://github.com/parallel-js/parallel.js'>Parallel.js</a> (Rockstar with 2K+ stars)</th><th>Cluster (Node.js original)</th></tr></thead>
+<tbody><tr><td>Computational Resources</td><td><strong>Local Cores &amp; Cluster Cores</strong></td><td>Local Cores</td><td>Local Cores</td></tr><tr><td>Lines of Code for Similar Tasks (Mandelbrot, ~20 for serial)</td><td><strong>~40</strong></td><td>~60</td><td>~80</td></tr><tr><td>Load Balancing Assignment</td><td><strong>YES</strong></td><td><strong>YES</strong></td><td>NO</td></tr><tr><td>Manual Assignment</td><td><strong>YES</strong></td><td>NO</td><td><strong>YES</strong></td></tr><tr><td>Asynchronous Job Support</td><td><strong>YES</strong></td><td>NO</td><td><strong>YES</strong></td></tr><tr><td>Overhead per Job</td><td><strong>LOW</strong></td><td>HIGH</td><td><strong>LOW</strong></td></tr><tr><td>Data Synchronization Mechanism</td><td><strong>Transparent sync environment</strong></td><td>One string only</td><td>One string only</td></tr><tr><td>Communication</td><td><strong>Anytime, to Anyone (via Channel)</strong></td><td>On Spawn only, Master-Worker only</td><td>Anytime, Master-Worker only</td></tr><tr><td>MPI Support</td><td><strong>YES</strong></td><td>NO</td><td><strong>YES</strong></td></tr><tr><td>Data-Parallel Support</td><td>On the way!</td><td><strong>YES</strong></td><td>NO</td></tr></tbody>
+</table>
+
+<h2>Wonderful Features</h2>
+<h3>One-step Wrapper to Parallelize Function</h3>
+<p>Simply by wrapping one function with <code>$()</code>, you can get one distributed version and invoke it on workers. Note that in wrapped functions, you can only refer to <code>$</code> (synchronized environment) and <code>accel</code> (package itself).</p>
+<br/><h3>Easy to Go Distributed</h3>
+<p>All you need to do to parallelize your Node.js application to multiple machines is modify your launching command, <em>e.g.</em>, from <code>acceljs bar.js</code> to <code>acceljs -l 4 -r m1:15618 4 bar.js</code>. (For detail refer to <code>acceljs --help</code>)</p>
+<br/><h3>Environment Synchronization</h3>
+<p>Accel.js performs smart (delta sync) and transparent environment synchronization to help you transfer all data you want to workers. Since it is delta synchronization, you won&#39;t pay for extra communication costs once transferred.</p>
+<pre class="prettyprint">
+const accel=require(&quot;accel&quot;);
+const $=accel();
+
+$.alpha=0.6;
+$.mixNumber=(c1, c2) =&gt; $.alpha*c1+(1-$.alpha)*c2;
+$(function foo(n) {
+    // you can use $.mixNumber and $.alpha here
 });
 </pre>
-<h4>Channel</h4>
-<p>Accel.js also has wonderful support for MPI jobs. After launched, the workers talk to each other by channel.</p>
-<h3>Broadcast Channel</h3>
-<p>Broadcast Channel is a <a href='https://tour.golang.org/concurrency/2'>Golang style</a> multi-consumer-multi-producer channel that is accessible by all the workers as well as master. Everyone can act as a producer and a consumer, i.e., send to the channel or receive from the channel. The receiving function will not callback before anything is received, while the sending function will not callback when the buffer is full.</p>
-<p>Use the simple API to create a broadcast channel:</p>
+<br/><h3>Asynchronous Function on Worker</h3>
+<p>Although Accel.js by default treats one function as completed in return, you can explicitly assign an asynchronous function to worker and it will not be marked completed until callback is invoked.</p>
 <pre class="prettyprint">
-$.c=new accel.Channel([bufferSize]);
+function bar(time, callback) {
+    setTimeout(() =&gt; callback(&quot;Finishes&quot;), time);
+}
+$(bar, &quot;async&quot;)(1000, (res) =&gt; {
+    // will get here after 1000ms
+});
 </pre>
-<p>Where the parameter is the size of channel, which by default is 0.</p>
-<h3>Unicast Channel</h3>
-<p>Unicast Channel has the same API as broadcast channel (see below), but only support the communication between two which are specified in creation. Since unicast channel utilize direct IPC between workers instead of being controlled by master, it has lower latency.</p>
-<p>Use similar API to create a unicast channel:</p>
+<br/><h3>Universal Dependency</h3>
+<p>When you want to require a dependency for worker, you don&#39;t have to do it once in every worker code. Instead, take our universal dependency and use it everywhere.</p>
 <pre class="prettyprint">
-$.c=new accel.Channel(participant1, participant2[, bufferSize]);
+$.os=accel.require(&quot;os&quot;);    // introduce an universal dependency
+function printOS() {
+    return $.os.platform();
+}
+console.log(printOS);    // you can use it on master
+$(printOS)((res) =&gt; console.log(res));  // or use it on worker
 </pre>
-<p>In which participant is the number of workers, or -1 for master.</p>
-<h2>Results</h2>
-<p><em>All the evaluations are performed on Amazon EC2 c4.xlarge, which has 4 vCPUs and 7.5GB of memory.</em></p>
-<h3>CPU Intensive Task: Rendering Mandelbrot Graph</h3>
-<p>We render large Mandelbrot graph (26000x6000) using either serial Node.js or divide the graph horizontally into subtasks and dispensing the subtasks to different cores using either Accel.js or Parallel.js. For each task, we glean the time spent on computation as well as framework itself (communication, framework code, etc.) and the result is as follows:</p>
-<p><img class="fixedHeight" src='docs/img/x.png' alt='' /></p>
-<ul><li>
-Accel-k denotes the performance of Accel.js on k distributed machines. And the speedup is almost linear (Accel-1 to Serial, Accel-4 to Accel-1), which shows that Accel.js achieves good utility of all the cores involved.</li>
-<li>
-Parallel.js takes much longer time due to too much framework overhead (checkout reason below.)</li>
-<li>
-Due to all-to-all communication nature of Accel.js, when there’re lots of machines, the framework overhead may be exaggerated by straggler. Also, the scalability of problem (arithmetics-communication ratio, i.e., image width) itself may prevent application from scaling further.</li>
-</ul>
-<p><img class="fixedHeight" src='docs/img/y.png' alt='' /></p>
-<ul><li>
-Accel-1-k/Parallel.js-k denotes the execution time on one machines when the task is divided into k subtasks.</li>
-<li>
-When k is small (k=4), computation time is long due to several load imbalance.</li>
-<li>
-When k is large, Parallel.js introduces too much overhead because it seldom reuses workers for subtasks and chrome V8 VM launching overhead is not ignorable for many subtasks.</li>
-</ul>
-<h4>Hybrid Task: Google Font Subsetting Service</h4>
-<p>Google Font Subsetting Service receives a URL from requesters -&gt; crawls the URL -&gt; reads some large font file (10s of MB) from disks -&gt; setups index in the memory -&gt; subsets the font -&gt; output the font to the disks -&gt; serve the static file to requester. One part of the requesting is disk I/O bounded and the other is CPU bounded. We run the web server on single machines using original Node.js, Parallel.js and Accel.js to measure the throughput and response time:</p>
-<p><img class="fixedHeight" src='docs/img/z.png' alt='' /></p>
-<p><img class="fixedHeight" src='docs/img/w.png' alt='' /></p>
-<ul><li>
-Both Accel.js and Parallel.js achieves 2x better performance in resp. time and throughput. Since part of the task is Disk I/O bounded, the application cannot achieve wonderful 4x speedup.</li>
-<li>
-Accel.js outperforms Parallel.js because Accel.js has optimized data communication socket, and delta synchronization so that the functions and data will not be transferred twice.</li>
-<li>
-Accel.js is capable of scaling further on distributed environment since there’s no disk contention on different machines. In this scenario, Accel.js master is some-kind like a load balancer in cluster.</li>
-</ul>
-<p>We also introduces some possibility to issue <em>Cache Hit Request</em>, which requests generated subsetted fonts and is served just a static file. The response time of Cache Hit Request is as follows:</p>
-<p><img class="fixedHeight" src='docs/img/p.png' alt='' /></p>
-<ul><li>
-Cache Hit Request is expected to be served in almost no time.</li>
-<li>
-Serial server takes very long to serve it because the event loop is blocked by other computing requests and cannot serve any request.</li>
-</ul>
-<h2>LIST OF WORK BY EACH STUDENT</h2>
-<p>Equal work was performed by both project members.</p>
-<h2>REFERENCE</h2>
-<ul><li>
-<a href='https://insights.stackoverflow.com/survey/2016'>Stackoverflow 2016 developer survey</a></li>
-<li>
-<a href='https://nodejs.org/api/modules.html'>Node.js documentation</a> </li>
-<li>
-<a href='https://parallel.js.org/'>Parallel.js</a></li>
-<li>
-<a href='https://github.com/levythu/accel.js'>Accel.js</a></li>
-</ul>
+<br/><h3>MPI Support</h3>
+<p>Accel.js also have brilliant support for MPI jobs, where you assign long running jobs for each node (instead of assigned by job queues) and each job communicate with each other.</p>
+<pre class="prettyprint">
+$.ch1=new accel.Channel();  // a multi-producer-multi-consumer channel
+function MPIJob(callback) {
+    var nodeId=accel.id;
+    accel.Recv((msg, fromNode) =&gt; {  // receive a message from pre-defined channel
+        // ...
+    });
+    $.ch1.Send(someMessage);  // or send one message to self-defined broadcast channel
+}
+$(MPIJob, &quot;async&quot;).toAll()(() =&gt; {
+    // since MPI job do not complete, the callback will never get invoked
+});
+</pre>
+
+<br/><h3>More...</h3>
+<p><i>For complete list of features chck out <a href="./docs.html">documentation</a></i></p><br/>
+
+
+<h2>Evaluation</h2>
+<h3>Mandelbrot Graph Calculation</h3>
+<p>
+    <img class="fixedHeight" src='./experiment/mandelbrot/mandelbrot1.png' alt='' />
+    <img class="fixedHeight" src='./experiment/mandelbrot/mandelbrot2.png' alt='' />
+</p>
+<p><em>1. All experiments are conducted on 4-core machines. Task to be done is rendering 26k x 4k mandelbrot graph and Accel-k denotes the performance of
+    Accel.js on k machines. (Since Parallel.js cannot utilize multiple machines, we ignore Parallel-k)</em>
+    <br/>
+    <em>2. Comparison between Accel-1 and Parallel.js, with trailing -k as the number of subtasks.</em>
+</p>
+
+<h3>Webfont Subsetting Service</h3>
+<p>
+    <img class="fixedHeight" src='./experiment/fontmin/1.png' style="height:18em;" alt='' />
+    <img class="fixedHeight" src='./experiment/fontmin/2.png' style="height:18em;" alt='' />
+    <img class="fixedHeight" src='./experiment/fontmin/3.png' style="height:18em;" alt='' />
+</p>
+<p><em>1. All experiments are conducted on one 4-core machine.</em>
+    <br/>
+    <em>2. Webfont subsetting service is a Google Font like web app, which receives an URL, crawls its data and subset a large font file.
+        The task is both Disk-I/O-intensive (read and write the font file (~10MBs)) and CPU-intensive (parse the font and setup index in memory)</em>
+            <br/>
+    <em>3. To simulate real workload, all servers are implemented with cache, and it takes almost no time to serve a cache hit.</em>
+</p>
+
+<p><em>More Evaluations on the way!</em></p>
 
       </section>
     </div>
