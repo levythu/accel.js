@@ -1,9 +1,0 @@
-{
-    "env": [
-        {
-            "remote": 1,
-            "endpoint": "aws.levy.at",
-            "port": 18888
-        }
-    ],
-}
