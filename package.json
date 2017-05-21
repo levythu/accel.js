@@ -1,6 +1,6 @@
 {
   "name": "accel",
-  "version": "0.0.17",
+  "version": "0.1.9",
   "description": "Gracefully parallelize Node.js on multi-cores and multi-nodes",
   "main": "lib/index.js",
   "scripts": {
@@ -16,10 +16,12 @@
   ],
   "dependencies": {
       "caller": "1.0.1",
+      "ip": "^1.1.5",
       "json-socket": "*"
   },
   "bin": {
-      "acceljs": "bin/launcher.js"
+      "acceljs": "bin/launcher.js",
+      "accel-daemon": "bin/launch-daemon.js"
   },
   "contributors": [
       {
